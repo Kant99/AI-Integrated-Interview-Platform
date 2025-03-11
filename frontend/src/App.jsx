@@ -1,6 +1,6 @@
-import LandingPage from "./components/landingPage/landingPage"
+import LandingPage from "./components/LandingPage/landingPage"
 
-function App() {
+const App = ()=> {
 
   return (
     <>
