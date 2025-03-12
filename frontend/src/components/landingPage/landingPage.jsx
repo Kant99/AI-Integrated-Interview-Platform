@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import "./landingPage.css";
+import {useNavigate} from "react-router";
 
 const LandingPage = () => {
   const [isVisible, setIsVisible] = useState(false);
-
+  const navigate = useNavigate();
   useEffect(() => {
     setTimeout(() => setIsVisible(true), 100); // Smooth fade-in after 100ms
   }, []);
@@ -26,7 +27,7 @@ const LandingPage = () => {
         </p>
 
         {/* Get Started Button */}
-        <button className="bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-lg font-medium shadow-md transform transition-transform duration-200 hover:scale-110">
+        <button onClick={() => navigate("/signup")} className="bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-lg font-medium shadow-md transform transition-transform duration-200 hover:scale-110">
           Get Started
         </button>
       </div>
