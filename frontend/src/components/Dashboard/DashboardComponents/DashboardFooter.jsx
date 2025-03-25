@@ -1,10 +1,9 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router-dom"
 
-export function DashboardFooter() {
+function DashboardFooter() {
   return (
     <footer className="mt-auto border-t py-6">
-      <div className="container mx-auto flex flex-col items-center justify-between gap-4 md:flex-row px-4">
+      <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
         <p className="text-center text-sm text-gray-500">
           &copy; {new Date().getFullYear()} AI Mock Interview Platform. All rights reserved.
         </p>
@@ -24,5 +23,8 @@ export function DashboardFooter() {
         </nav>
       </div>
     </footer>
-  );
+  )
 }
+
+export default DashboardFooter
+

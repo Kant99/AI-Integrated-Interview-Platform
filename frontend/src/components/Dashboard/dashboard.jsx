@@ -1,14 +1,10 @@
-import React from "react";
-import { DashboardLayout } from "./DashboardComponents/dashboard-layout"; 
-import { ProfileSection } from "./DashboardComponents/profile-section.jsx"
-import { InterviewSetup } from "./DashboardComponents/interview-setup";
-import { InterviewHistory } from "./DashboardComponents/interview-history";
-import { DashboardFooter } from "./DashboardComponents/dashboard-footer";
-import { useIsMobile } from "../../hooks/useIsMobile.jsx";
+import DashboardLayout from "./DashboardComponents/DashboardLayout"
+import ProfileSection from "./DashboardComponents/ProfileSection"
+import InterviewSetup from "./DashboardComponents/InterviewSetup"
+import InterviewHistory from "./DashboardComponents/InterviewHistory"
+import DashboardFooter from "./DashboardComponents/DashboardFooter"
 
-export default function DashboardPage() {
-  const isMobile = useIsMobile();
-
+function Dashboard() {
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6 p-6 md:gap-8">
@@ -19,10 +15,14 @@ export default function DashboardPage() {
         />
 
         <InterviewSetup />
+
         <InterviewHistory />
 
-        {!isMobile && <DashboardFooter />}
+        <DashboardFooter />
       </div>
     </DashboardLayout>
-  );
+  )
 }
+
+export default Dashboard
+
