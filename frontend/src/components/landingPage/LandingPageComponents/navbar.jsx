@@ -31,7 +31,7 @@ export default function Navbar() {
               Booking
             </Link>
             <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-              <Link to="/signup">Log In</Link>
+              <Link to="/login">Log In</Link>
             </button>
           </div>
 
