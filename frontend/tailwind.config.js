@@ -6,7 +6,18 @@ module.exports = {
       "./src/**/*.{js,jsx}",
     ],
     theme: {
-      extend: {},
+      extend: {
+        keyframes: {
+          hiUserGlow: {
+            '0%, 100%': { transform: 'scale(1)', opacity: 1 },
+            '50%': { transform: 'scale(1.05)', opacity: 0.85 },
+          },
+        },
+        animation: {
+          hiUserGlow: 'hiUserGlow 2s ease-in-out infinite',
+        },
+      }
+      ,
     },
     plugins: [],
   }

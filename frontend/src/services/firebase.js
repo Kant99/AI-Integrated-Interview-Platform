@@ -1,21 +1,17 @@
-// src/firebase.js
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBSHlyLOqWkIhO2SpfGy2ijRofGOP3vWag",
-  authDomain: "mockinterview-ai-6c2f1.firebaseapp.com",
-  projectId: "mockinterview-ai-6c2f1",
-  storageBucket: "mockinterview-ai-6c2f1.appspot.com",
-  messagingSenderId: "691334985706",
-  appId: "1:691334985706:web:807a27769ff9dc472a6493",
-  measurementId: "G-TMXK96FJ80"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
-
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Firebase services
 export const auth = getAuth(app);
 export const analytics = getAnalytics(app);

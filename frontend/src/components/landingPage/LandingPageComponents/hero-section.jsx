@@ -1,20 +1,30 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import React from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../../../services/firebase";
 import "../landingPage.css";
 
 export default function HeroSection() {
+  const [user] = useAuthState(auth);
+
   return (
     <section className="py-20 bg-[#f5f9ff]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="lg:grid lg:grid-cols-2 lg:gap-8 items-center">
           {/* Left Side - Text Content */}
           <div className="mb-12 lg:mb-0">
+            {user && (
+              <h2 className="text-2xl font-semibold text-blue-600 animate-hiUserGlow mb-2">
+                Hi, {user.displayName || user.email.split("@")[0]} 👋
+              </h2>
+            )}
             <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 leading-tight mb-6">
               Ace Your Next Interview with AI-Powered Practice
             </h1>
             <p className="text-xl text-gray-600 mb-8">
-              MockInterview.ai uses advanced AI to simulate realistic interview scenarios, provide instant feedback, and help you land your dream job.
+              MockInterview.ai uses advanced AI to simulate realistic interview scenarios,
+              provide instant feedback, and help you land your dream job.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
