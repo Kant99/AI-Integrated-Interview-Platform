@@ -2,6 +2,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // for redirect
 import { motion } from "framer-motion";
+import { db, auth } from "../../services/firebase"; 
+import { collection, doc, setDoc } from "firebase/firestore";
+
 
 const InterviewForm = () => {
   const navigate = useNavigate();
@@ -10,7 +13,6 @@ const InterviewForm = () => {
     techStack: "",
     role: "",
     experience: "",
-    dateTime: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -48,16 +50,42 @@ const InterviewForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      setIsSubmitting(true);
-
-      setTimeout(() => {
-        navigate("/interview"); // Navigate after slight delay
-      }, 1500); // 1.5 second loading effect
+    if (!validateForm()) return;
+  
+    const user = auth.currentUser;
+    if (!user) {
+      alert("You must be logged in to start an interview.");
+      return;
+    }
+  
+    setIsSubmitting(true);
+  
+    try {
+      const interviewsCollectionRef = collection(db, "users", user.uid, "interviews");
+      const newInterviewDocRef = doc(interviewsCollectionRef); // generate document reference with ID
+      const interviewId = newInterviewDocRef.id;
+      
+  
+      const interviewData = {
+        ...formData,
+        userId: user.uid,
+        interviewId,
+      };
+  
+      await setDoc(newInterviewDocRef, interviewData);
+  
+      navigate("/interview");
+    } catch (error) {
+      console.error("Error saving interview:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
+  
+  
 
   const containerVariants = {
     hidden: {},
@@ -117,20 +145,6 @@ const InterviewForm = () => {
               {errors[field] && <p className="mt-1 text-sm text-red-500">{errors[field]}</p>}
             </motion.div>
           ))}
-
-          <motion.div variants={itemVariants} className="mb-6">
-            <label htmlFor="dateTime" className="block text-sm font-semibold text-gray-700 mb-1">
-              Date and Time
-            </label>
-            <input
-              type="text"
-              id="dateTime"
-              name="dateTime"
-              value={formData.dateTime}
-              disabled
-              className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg cursor-not-allowed"
-            />
-          </motion.div>
 
           <motion.button
             variants={itemVariants}
