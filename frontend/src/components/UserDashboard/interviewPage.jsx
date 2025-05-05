@@ -1,10 +1,63 @@
-// InterviewPage.jsx
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Bot, User } from "lucide-react"; // install lucide-react icons: npm install lucide-react
+import { Bot, User } from "lucide-react";
+import Vapi from "@vapi-ai/web";
+
 
 const InterviewPage = () => {
   const [speaking, setSpeaking] = useState("bot"); // "bot" or "user"
+  const vapiRef = useRef(null);
+
+  useEffect(() => {
+    // Initialize VAPI
+    vapiRef.current = new Vapi({
+      apiKey: import.meta.env.VITE_VAPI_API_KEY, 
+    });
+
+    // Event when call starts
+    vapiRef.current.on("call-start", () => {
+      console.log("Call started");
+    });
+
+    // Handle speech events
+    vapiRef.current.on("speech-start", (event) => {
+      if (event.speaker === "agent") {
+        setSpeaking("bot");
+      } else {
+        setSpeaking("user");
+      }
+    });
+
+    // Event when call ends
+    vapiRef.current.on("call-end", () => {
+      console.log("Call ended");
+      setSpeaking("bot"); // reset
+    });
+
+    // Cleanup
+    return () => {
+      vapiRef.current.hangUp();
+    };
+  }, []);
+
+  const startInterview = () => {
+    if (!vapiRef.current) return;
+
+    vapiRef.current.start({
+      agentId: import.meta.env.VITE_VAPI_ASSISTANT_ID, 
+      user: { name: "User" },
+      context: {
+        // 🔁 You can replace this with dynamically fetched questions
+        questions: [
+          "Tell me about yourself.",
+          "What are your strengths?",
+          "Explain a challenging bug you fixed.",
+          "What is the difference between REST and GraphQL?",
+          "How do you stay updated with tech trends?"
+        ],
+      },
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-purple-50 flex flex-col items-center justify-center p-6">
@@ -44,16 +97,16 @@ const InterviewPage = () => {
 
         <div className="mt-12 flex gap-4">
           <button
-            onClick={() => setSpeaking("bot")}
-            className="px-4 py-2 bg-purple-500 text-white rounded-lg shadow hover:bg-purple-600 transition"
+            onClick={startInterview}
+            className="px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition"
           >
-            Bot Speaking
+            Start Interview
           </button>
           <button
-            onClick={() => setSpeaking("user")}
-            className="px-4 py-2 bg-indigo-500 text-white rounded-lg shadow hover:bg-indigo-600 transition"
+            onClick={() => vapiRef.current?.hangUp()}
+            className="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition"
           >
-            User Speaking
+            End Interview
           </button>
         </div>
       </motion.div>

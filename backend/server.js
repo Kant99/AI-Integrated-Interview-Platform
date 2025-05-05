@@ -1,45 +1,25 @@
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import bodyParser from "body-parser";
+import generateQuestionsRouter from "./generateQuestions.js";
 
-import { GoogleGenAI } from '@google/genai';
-import dotenv from 'dotenv';
 dotenv.config();
 
-const API_KEY = process.env.GEMINI_API_KEY;
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+app.use(cors());
+app.use(bodyParser.json());
+
+app.use("/api/generate-questions", generateQuestionsRouter);
+app.get("/test", (req, res) => res.send("It works!"));
 
 
+app.get("/", (req, res) => {
+  res.send("API is running...");
+});
 
-const ai = new GoogleGenAI({ apiKey: API_KEY });
-
-try {
-    const prompt = `
-Act like an interviewer and generate 5 technical interview questions for the following candidate:
-
-Role: "Frontend Developer"
-Tech Stack: "MERN Stack"
-Experience: 3 years
-    `;
-
-    
-    const result = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: prompt,
-    });
-    console.log(result.text);
-
-    
-  } catch (error) {
-    console.error("Error generating questions:", error.message);
-    
-  }
-
-
-//   const ai = new GoogleGenAI({ apiKey: "YOUR_API_KEY" });
-
-//   async function main() {
-//     const response = await ai.models.generateContent({
-//       model: "gemini-2.0-flash",
-//       contents: "Explain how AI works in a few words",
-//     });
-//     console.log(response.text);
-//   }
-  
-//   main();
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

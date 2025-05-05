@@ -64,9 +64,8 @@ const InterviewForm = () => {
   
     try {
       const interviewsCollectionRef = collection(db, "users", user.uid, "interviews");
-      const newInterviewDocRef = doc(interviewsCollectionRef); // generate document reference with ID
+      const newInterviewDocRef = doc(interviewsCollectionRef);
       const interviewId = newInterviewDocRef.id;
-      
   
       const interviewData = {
         ...formData,
@@ -74,9 +73,36 @@ const InterviewForm = () => {
         interviewId,
       };
   
+      // Save to Firestore
       await setDoc(newInterviewDocRef, interviewData);
+      console.log("Interview data saved to Firestore:", interviewData);
   
-      navigate("/interview");
+      // Get questions from Gemini via backend
+
+  
+      const response = await fetch("http://localhost:5000/api/generate-questions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      console.log("Response from backend:", response);
+      
+  
+      const data = await response.json();
+  
+      if (!response.ok) throw new Error(data.error || "Failed to get questions");
+  
+      // Optionally save questions to Firestore under the same document
+      await setDoc(newInterviewDocRef, {
+        ...interviewData,
+        questions: data.questions,
+      });
+  
+      // Or store in state / context and navigate to a page to display
+      navigate("/interview", { state: { questions: data.questions } });
+  
     } catch (error) {
       console.error("Error saving interview:", error);
       alert("Something went wrong. Please try again.");
@@ -84,6 +110,7 @@ const InterviewForm = () => {
       setIsSubmitting(false);
     }
   };
+  
   
   
 
