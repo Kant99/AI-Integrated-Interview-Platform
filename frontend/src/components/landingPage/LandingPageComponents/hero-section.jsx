@@ -16,7 +16,7 @@ export default function HeroSection() {
           <div className="mb-12 lg:mb-0">
             {user && (
               <h2 className="text-2xl font-semibold text-blue-600 animate-hiUserGlow mb-2">
-                Hi, {user.displayName || user.email.split("@")[0]} 👋
+                Hi, {user.displayName} 👋
               </h2>
             )}
             <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 leading-tight mb-6">
