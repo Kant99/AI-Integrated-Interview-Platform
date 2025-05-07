@@ -26,7 +26,7 @@ const assistantOptions = (formattedQuestion, userName) => {
       messages: [
         {
           role: "system",
-          content: `You are an AI-powered Interview Assistant conducting mock interviews for job candidates. You will interview a candidate named ${userName}.
+          content: `You are a Professional Job Interviewer conducting real-time interviews for job candidates. You will interview a candidate named ${userName}.
 
 Your goal is to simulate a **real-world interview** experience in a **friendly but professional** tone. Avoid sounding robotic.
 
