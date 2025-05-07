@@ -147,7 +147,7 @@ const InterviewPage = () => {
     transition={{ duration: 0.4 }}
     className="my-6 text-center max-w-xl px-4 text-gray-700 text-lg"
   >
-    <span className="font-medium text-purple-600">Last Message:</span> {lastMessage}
+     {lastMessage}
   </motion.div>
 )}
 
