@@ -1,11 +1,4 @@
 import Vapi from "@vapi-ai/web";
-
-
-
-
-
-
-
 const assistantOptions = (formattedQuestion, userName) => {
 
   return {

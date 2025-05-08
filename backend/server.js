@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import bodyParser from "body-parser";
 import generateQuestionsRouter from "./generateQuestions.js";
+import generateFeedback from "./generateFeedback.js";
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.use("/api/generate-questions", generateQuestionsRouter);
+app.use("/api/feedback", generateFeedback);
 app.get("/test", (req, res) => res.send("It works!"));
 
 
