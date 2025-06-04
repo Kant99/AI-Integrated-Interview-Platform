@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../../services/firebase';
 import { useLocation } from 'react-router-dom';
@@ -12,9 +12,8 @@ const FeedbackPage = () => {
   const location = useLocation();
   const { state } = location;
   const interviewMessages = state?.messages || [];
-  
-  const [loading, setLoading] = useState(true);
-  const [feedback, setFeedback] = useState(null);
+  const feedback = state?.feedback || null;
+
   const [expandedSections, setExpandedSections] = useState({
     strengths: true,
     improvements: true,
@@ -29,107 +28,6 @@ const FeedbackPage = () => {
       [section]: !expandedSections[section],
     });
   };
-
-  useEffect(() => {
-    // This function simulates AI analysis of the interview
-    // In production, you would replace this with a real API call
-    const analyzeInterview = async () => {
-      try {
-        // If no messages, return early
-        if (!interviewMessages || interviewMessages.length <= 1) {
-          setLoading(false);
-          return;
-        }
-
-        // For now, we'll simulate the analysis with a timeout and structured response
-        setTimeout(() => {
-    
-          const conversationData = interviewMessages
-            .filter(msg => msg.role && msg.content)
-            .map(msg => ({
-              role: msg.role === 'user' ? 'Candidate' : 'Interviewer',
-              content: msg.content
-            }));
-          
-          // Simple heuristic analysis (replace with actual AI analysis)
-          let technicalScore = 0;
-          let communicationScore = 0;
-          let problemSolvingScore = 0;
-          let confidenceScore = 0;
-          
-          // Very basic analysis based on message length and keywords
-          // This is just a placeholder - real analysis would be much more sophisticated
-          const candidateResponses = conversationData.filter(msg => msg.role === 'Candidate');
-          const avgResponseLength = candidateResponses.reduce((sum, msg) => 
-            sum + msg.content.length, 0) / Math.max(1, candidateResponses.length);
-          
-          // Sample scoring logic (replace with real AI scoring)
-          technicalScore = Math.min(85, 40 + Math.floor(avgResponseLength / 20));
-          communicationScore = Math.min(90, 50 + Math.floor(avgResponseLength / 15));
-          problemSolvingScore = Math.min(80, 45 + Math.floor(avgResponseLength / 25));
-          confidenceScore = Math.min(88, 55 + Math.floor(avgResponseLength / 18));
-          
-          // Total score is weighted average
-          const totalScore = Math.floor(
-            (technicalScore * 0.35) + 
-            (communicationScore * 0.25) + 
-            (problemSolvingScore * 0.25) + 
-            (confidenceScore * 0.15)
-          );
-          
-          const feedbackData = {
-            totalScore,
-            categoryScores: [
-              {
-                name: 'Technical Knowledge',
-                score: technicalScore,
-                comment: 'Demonstrated solid understanding of core concepts, but could expand on implementation details.',
-              },
-              {
-                name: 'Communication',
-                score: communicationScore,
-                comment: 'Clear and concise communication. Consider using more technical terminology when appropriate.',
-              },
-              {
-                name: 'Problem Solving',
-                score: problemSolvingScore,
-                comment: 'Good approach to breaking down problems. Could improve on discussing alternative solutions.',
-              },
-              {
-                name: 'Confidence',
-                score: confidenceScore,
-                comment: 'Presented ideas with good confidence. Occasional hesitation when discussing complex topics.',
-              },
-            ],
-            strengths: [
-              'Clear articulation of thought process',
-              'Good understanding of fundamental concepts',
-              'Structured approach to problem-solving',
-            ],
-            areasForImprovement: [
-              'Consider discussing trade-offs in your solutions',
-              'Deepen knowledge in system design patterns',
-              'Practice explaining complex concepts more concisely',
-            ],
-            finalAssessment: `Overall, you performed well in this mock interview. Your strongest areas were communication and confidence. To improve further, focus on deepening your technical knowledge and practicing more complex problem-solving scenarios. Based on this performance, you show good potential for intermediate developer roles.`,
-          };
-          
-          setFeedback(feedbackData);
-          setLoading(false);
-        }, 1500); // Simulate API delay
-        
-      } catch (error) {
-        console.error('Error analyzing interview:', error);
-        setLoading(false);
-      }
-    };
-
-    if (interviewMessages.length > 0) {
-      analyzeInterview();
-    } else {
-      setLoading(false);
-    }
-  }, [interviewMessages]);
 
   // Data for chart
   const prepareChartData = () => {
@@ -148,22 +46,7 @@ const FeedbackPage = () => {
     return '#f87171'; // red
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-purple-50">
-        <div className="text-center">
-          <motion.div
-            className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          />
-          <p className="text-lg text-purple-700 font-medium">Analyzing your interview...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!feedback) {
+  if (!feedback || !interviewMessages || interviewMessages.length <= 1) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-purple-50">
         <div className="text-center p-8 bg-white rounded-lg shadow-md max-w-md">

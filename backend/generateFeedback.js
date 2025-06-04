@@ -8,19 +8,65 @@ const router = express.Router();
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+function cleanJsonString(rawOutput) {
+  return rawOutput
+    .replace(/^```json\s*/, '')  // Remove opening ```json (if it exists)
+    .replace(/^```/, '')         // Just in case only ``` was used
+    .replace(/```$/, '')         // Remove closing ```
+    .trim();                     // Remove leading/trailing whitespace
+}
+
 router.post("/", async (req, res) => {
-  const { messages } = req.body;
-
-  if (!messages || !Array.isArray(messages) || messages.length === 0) {
-    return res.status(400).json({ error: "Missing or invalid interview messages" });
-  }
-
   try {
-    // Format the interview transcript for the AI
-    const formattedTranscript = messages
+    // Log the entire request body for debugging
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+
+    // Extract transcript from req.body.messages
+    const transcript = req.body.messages;
+
+    // Validate transcript
+    if (!transcript) {
+      console.error('Messages property is missing or undefined');
+      return res.status(400).json({ error: 'Messages property is missing or undefined' });
+    }
+    if (!Array.isArray(transcript)) {
+      console.error('Messages is not an array:', transcript);
+      return res.status(400).json({ error: 'Messages must be an array' });
+    }
+    if (transcript.length === 0) {
+      console.error('Messages array is empty');
+      return res.status(400).json({ error: 'Messages array is empty' });
+    }
+
+    // Validate transcript entries
+    const validTranscript = transcript.every((msg, index) => {
+      const isValid = msg && typeof msg === 'object' && 'role' in msg && 'content' in msg;
+      if (!isValid) {
+        console.error(`Invalid messages entry at index ${index}:`, msg);
+      }
+      return isValid;
+    });
+    if (!validTranscript) {
+      return res.status(400).json({ error: 'Messages array contains invalid entries (must have role and content)' });
+    }
+
+    // Log the received transcript
+    console.log('Received messages:', JSON.stringify(transcript, null, 2));
+
+    // Remove the first entry from the transcript
+    let transcriptSliced = transcript.length > 0 ? transcript.slice(1) : [];
+
+    // Log the modified transcript
+    console.log('Modified messages (after removing first entry):', JSON.stringify(transcriptSliced, null, 2));
+
+    // Format the transcript
+    const formattedTranscript = transcriptSliced
       .filter(msg => msg.role && msg.content)
       .map(msg => `${msg.role === 'user' ? 'Candidate' : 'Interviewer'}: ${msg.content}`)
       .join("\n");
+
+    // Log the formatted transcript
+    console.log('Formatted transcript:', formattedTranscript);
 
     const prompt = `You are an expert interview evaluator. Please analyze the following mock interview transcript and provide detailed feedback.
 
@@ -69,7 +115,7 @@ Format your response as a JSON object following this structure:
 }`;
 
     const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash", // You can use "gemini-2.0-pro" for more nuanced analysis
+      model: "gemini-2.0-flash",
       contents: prompt,
       temperature: 0.2,
       responseFormat: { type: "json" },
@@ -81,8 +127,10 @@ Format your response as a JSON object following this structure:
     // Parse the JSON response
     let feedbackData;
     try {
+      console.log("AI response:", result);
       const resultText = result.text;
-      feedbackData = JSON.parse(resultText);
+      console.log("Raw AI response text:", resultText);
+      feedbackData = JSON.parse(cleanJsonString(resultText));
       
       // Validation - ensure all required fields are present
       if (!feedbackData.totalScore || 
@@ -140,6 +188,9 @@ Format your response as a JSON object following this structure:
         finalAssessment: "The candidate shows promise with good foundational skills. With focused improvement in technical depth and problem-solving approach, they could become a solid contributor. Recommend additional practice with technical interviews."
       };
     }
+
+    // Log the final feedback data
+    console.log('Validated feedback data:', JSON.stringify(feedbackData, null, 2));
 
     res.status(200).json({ feedback: feedbackData });
 

@@ -8,6 +8,8 @@ const router = express.Router();
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+
+
 router.post("/", async (req, res) => {
   const { techStack, role, experience } = req.body;
 
@@ -57,5 +59,4 @@ Thank you! <3`;
     res.status(500).json({ error: "Failed to generate questions" });
   }
 });
-
 export default router;

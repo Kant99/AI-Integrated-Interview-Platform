@@ -18,6 +18,8 @@ const InterviewPage = () => {
   const { state } = location;
   const questionsArray = Object.values(state.questions);
   const userName = user?.displayName;
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState(null);
   
 
   const formattedQuestion = questionsArray
@@ -64,7 +66,8 @@ const InterviewPage = () => {
     
   }, [messages, callActive]);
 
-
+// Function to start the interview call
+  // This function is called when the user clicks the "Start Interview" button
   const startInterviewCall = async () => {
     try {
       const options = assistantOptions(formattedQuestion, userName);
@@ -76,20 +79,80 @@ const InterviewPage = () => {
       console.error("Failed to start interview:", error);
     }
   };
-
-  const endInterviewCall = async () => {
-    try {
-      await vapiRef.current.stop();
-      setCallActive(false);
-
-      vapiRef.current.on("message", (message) => {
-        console.log(message);
-      });
-    } catch (error) {
-      console.error("Failed to end interview:", error);
+  // Function to analyze the interview
+  // This function is called when the user clicks the "End Interview" button
+  const analyzeInterview = async (interviewMessages) => {
+  try {
+    // If no messages, return early
+    if (!interviewMessages || interviewMessages.length <= 1) {
+      setLoading(false);
+      return null;
     }
-    navigate("/feedback", { state: { messages } });
-  };
+
+    // Send interview messages to your backend API
+    const response = await fetch('http://localhost:5000/api/feedback', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ messages: interviewMessages }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('API error:', errorData);
+      throw new Error(`Failed to generate feedback: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(typeof data);
+    console.log('Feedback data:', data);
+    return data.feedback;
+
+  } catch (error) {
+    console.error('Error analyzing interview:', error);
+    throw error; // Re-throw to handle in parent function
+  }
+};
+
+const endInterviewCall = async () => {
+  try {
+    // Set loading to true at the beginning
+    setLoading(true);
+    
+    // Stop the Vapi call
+    await vapiRef.current.stop();
+    setCallActive(false);
+    console.log(typeof messages);
+    console.log(messages);
+    
+    // Analyze the interview and get feedback
+    const feedbackData = await analyzeInterview(messages);
+    
+    // Navigate to feedback page with both messages and feedback
+    navigate("/feedback", { 
+      state: { 
+        messages,
+        feedback: feedbackData 
+      } 
+    });
+    
+  } catch (error) {
+    console.error("Failed to end interview:", error);
+    // Handle error - maybe show an error message to user
+    // You might want to navigate even if analysis fails
+    navigate("/feedback", { 
+      state: { 
+        messages,
+        feedback: null,
+        error: "Failed to analyze interview"
+      } 
+    });
+  } finally {
+    // Always set loading to false when done
+    setLoading(false);
+  }
+};
 
   const lastMessage = messages[messages.length - 1].content;
 
